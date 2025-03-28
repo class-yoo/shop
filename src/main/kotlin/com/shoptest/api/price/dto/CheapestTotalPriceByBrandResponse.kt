@@ -14,7 +14,7 @@ data class CheapestBrandInfo(
     val brand: String,
 
     @JsonProperty("카테고리")
-    val categories: List<CheapestBrandPriceDto>,
+    val items: List<CheapestBrandPriceDto>,
 
     @JsonProperty("총액")
     @JsonSerialize(using = PriceToStringSerializer::class)

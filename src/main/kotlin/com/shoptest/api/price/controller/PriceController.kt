@@ -15,8 +15,9 @@ class PriceController(
 ) {
 
     @GetMapping("/cheapest")
-    fun getLowestPriceByCategory(): CheapestPriceByCategoryResponse {
-        return priceService.getCheapestPriceBrandPerCategory()
+    fun getLowestPriceByCategory(): ResponseEntity<CheapestPriceByCategoryResponse> {
+        val response = priceService.getCheapestPriceBrandPerCategory()
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping("/cheapest-brand")

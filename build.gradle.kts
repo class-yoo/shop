@@ -43,6 +43,10 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation("io.mockk:mockk:1.13.8")
+	testImplementation("org.assertj:assertj-core:3.25.1")
+	testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
 kotlin {

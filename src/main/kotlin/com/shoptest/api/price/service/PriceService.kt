@@ -64,7 +64,7 @@ class PriceService(
         return CheapestTotalPriceByBrandResponse(
             detail = CheapestBrandInfo(
                 brand = brandName,
-                categories = cheapestCategoryPrices.map {
+                items = cheapestCategoryPrices.map {
                     CheapestBrandPriceDto(it.first.displayName, it.second)
                 },
                 totalPrice = minTotal
