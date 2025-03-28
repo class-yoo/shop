@@ -1,8 +1,9 @@
 package com.shoptest.api.price.controller
 
-import com.shoptest.api.price.dto.LowestPriceByCategoryResponse
-import com.shoptest.api.price.dto.LowestTotalPriceByBrandResponse
+import com.shoptest.api.price.dto.CheapestPriceByCategoryResponse
+import com.shoptest.api.price.dto.CheapestTotalPriceByBrandResponse
 import com.shoptest.api.price.service.PriceService
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -13,15 +14,14 @@ class PriceController(
     private val priceService: PriceService
 ) {
 
-    @GetMapping("/lowest")
-    fun getLowestPriceByCategory(): LowestPriceByCategoryResponse {
-        return priceService.getLowestPriceByCategory()
+    @GetMapping("/cheapest")
+    fun getLowestPriceByCategory(): CheapestPriceByCategoryResponse {
+        return priceService.getCheapestPriceBrandPerCategory()
     }
 
-    @GetMapping("/lowest-brand")
-    fun getLowestTotalPriceBrand(): Map<String, LowestTotalPriceByBrandResponse> {
-        val result = priceService.getLowestTotalPriceBrand()
-        return mapOf("최저가" to result)
+    @GetMapping("/cheapest-brand")
+    fun getCheapestBrandDetail(): ResponseEntity<CheapestTotalPriceByBrandResponse> {
+        val response = priceService.getCheapestTotalPriceBrand()
+        return ResponseEntity.ok(response)
     }
-
 }

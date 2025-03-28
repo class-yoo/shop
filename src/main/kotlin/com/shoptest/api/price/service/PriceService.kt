@@ -1,15 +1,11 @@
 package com.shoptest.api.price.service
 
-import com.shoptest.api.price.dto.CategoryPriceDetail
-import com.shoptest.api.price.dto.CategoryPriceInfo
-import com.shoptest.api.price.dto.LowestPriceByCategoryResponse
-import com.shoptest.api.price.dto.LowestTotalPriceByBrandResponse
+import com.shoptest.api.price.dto.*
 import com.shoptest.common.message.MessageProvider
 import com.shoptest.domain.category.CategoryType
 import com.shoptest.domain.category.repository.CategoryRepository
 import com.shoptest.domain.product.repository.ProductRepository
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PriceService(
@@ -18,70 +14,62 @@ class PriceService(
     private val messageProvider: MessageProvider
 ) {
 
-    @Transactional(readOnly = true)
-    fun getLowestPriceByCategory(): LowestPriceByCategoryResponse {
-        val categories = categoryRepository.findAll()
+    fun getCheapestPriceBrandPerCategory(): CheapestPriceByCategoryResponse {
+        val data = productRepository.findLowestPriceBrandPerCategory()
 
-        val items = categories.map { category ->
-            val lowestProduct = productRepository.findAllByCategory(category)
-                .minByOrNull { it.price }
-                ?: throw IllegalStateException(
-                    messageProvider.get(
-                        "error.category.product.not.found", category.type.displayName
-                    )
-                )
-
-            CategoryPriceInfo(
-                category = category.type.displayName,
-                brand = lowestProduct.brand.name,
-                price = lowestProduct.price
+        val items = data.map { (categoryType, brand, price) ->
+            CheapestPriceDto(
+                category = categoryType.displayName,
+                brand = brand,
+                price = price
             )
-        }.sortedBy { CategoryType.entries.indexOf(CategoryType.fromDisplayName(it.category)) }
+        }
 
+        val totalPrice = items.sumOf { it.price }
 
-    val totalPrice = items.sumOf { it.price }
-
-        return LowestPriceByCategoryResponse(
+        return CheapestPriceByCategoryResponse(
             items = items,
             totalPrice = totalPrice
         )
     }
 
-    fun getLowestTotalPriceBrand(): LowestTotalPriceByBrandResponse {
-        val products = productRepository.findAll()
-        if (products.isEmpty()) throw IllegalStateException(
-            messageProvider.get("error.product.all.missing")
-        )
+    fun getCheapestTotalPriceBrand(): CheapestTotalPriceByBrandResponse {
+        val requiredCategoryCount = CategoryType.entries.size
+        val brandIds = productRepository.findAllBrandIdsHavingProducts()
 
-        // 브랜드별 상품 그룹핑
-        val groupedByBrand = products.groupBy { it.brand }
+        var cheapestBrandId: Long? = null
+        var cheapestCategoryPrices: List<Pair<CategoryType, Int>> = emptyList()
+        var minTotal = Int.MAX_VALUE
 
-        // 모든 브랜드가 8개 카테고리 갖추고 있는지 확인 & 총액 계산
-        val brandToTotalPrice = groupedByBrand
-            .filterValues { it.size == CategoryType.entries.size }
-            .mapValues { (_, products) -> products.sumOf { it.price } }
+        for (brandId in brandIds) {
+            val prices = productRepository.findCheapestPricePerCategoryByBrandId(brandId)
 
-        val lowestBrandEntry = brandToTotalPrice.minByOrNull { it.value }
-            ?: throw IllegalStateException(
-                messageProvider.get("error.brand.missing.all.categories")
-            )
+            if (prices.size != requiredCategoryCount) continue
 
-        val lowestBrand = lowestBrandEntry.key
-        val totalPrice = lowestBrandEntry.value
-
-        val categoryDetails = groupedByBrand[lowestBrand]!!
-            .sortedBy { it.category.id }
-            .map {
-                CategoryPriceDetail(
-                    category = it.category.type.displayName,
-                    price = it.price
-                )
+            val total = prices.sumOf { it.second }
+            if (total < minTotal) {
+                cheapestBrandId = brandId
+                cheapestCategoryPrices = prices
+                minTotal = total
             }
+        }
 
-        return LowestTotalPriceByBrandResponse(
-            brand = lowestBrand.name,
-            categories = categoryDetails,
-            totalPrice = totalPrice
+        if (cheapestBrandId == null) {
+            throw RuntimeException("모든 카테고리에 상품을 보유한 브랜드가 없습니다.")
+        }
+
+        val brandName = productRepository.findBrandNameById(cheapestBrandId)
+            ?: throw RuntimeException("브랜드 이름을 찾을 수 없습니다. ID: $cheapestBrandId")
+
+        return CheapestTotalPriceByBrandResponse(
+            detail = CheapestBrandInfo(
+                brand = brandName,
+                categories = cheapestCategoryPrices.map {
+                    CheapestBrandPriceDto(it.first.displayName, it.second)
+                },
+                totalPrice = minTotal
+            )
         )
     }
+
 }
