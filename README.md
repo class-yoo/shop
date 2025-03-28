@@ -117,7 +117,7 @@ docker ps | grep shop-app
 #### 🛠 API 상세
 
 - **HTTP Method**: `GET`
-- **Endpoint**: `/api/v1/price/lowest`
+- **Endpoint**: `/api/v1/price/cheapest`
 - **Request Body**: 없음
 - **Response**:
 
@@ -162,7 +162,7 @@ docker ps | grep shop-app
 #### 🛠 API 상세
 
 - **HTTP Method**: `GET`
-- **Endpoint**: `/api/v1/price/lowest-brand`
+- **Endpoint**: `/api/v1/price/cheapest-brand`
 - **Request Body**: 없음
 
 - **Response**:
@@ -185,6 +185,58 @@ docker ps | grep shop-app
 ```json
 {
   "message": "카테고리 OUTER 에 해당하는 상품이 없습니다.",
+  "status": 400
+}
+```
+
+---
+
+## ✅ 기능 3 - 카테고리별 최고가/최저가 브랜드 및 가격 조회
+
+### 📌 기능 설명
+
+특정 카테고리에 대해 **가장 비싼 상품을 가진 브랜드(들)**,  
+그리고 **가장 저렴한 상품을 가진 브랜드(들)**를 조회하는 API입니다.
+
+동일한 가격의 상품이 여러 브랜드에 있을 수 있으므로,  
+**최고가와 최저가 각각 여러 브랜드**가 응답될 수 있습니다.
+
+---
+
+### ✔️ 구현 범위
+
+- 요청으로 받은 카테고리(`CategoryType`)에 대해
+  - 가장 비싼 가격의 상품을 가진 브랜드 목록 조회
+  - 가장 저렴한 가격의 상품을 가진 브랜드 목록 조회
+- 가격이 동일한 경우 여러 브랜드가 함께 응답됨
+- 가격은 `₩10,000` 형식의 문자열로 응답
+- 카테고리에 해당하는 상품이 없는 경우 예외 처리
+
+### 🛠 API 상세
+
+- **HTTP Method**: `GET`
+- **Endpoint**: `/api/v1/price/max-min`
+- **Request Param**:
+  - `category`: 카테고리명 (예: `TOP`, `OUTER`, `PANTS`, `SNEAKERS`, `BAG`, `HAT`, `SOCKS`, `ACCESSORY`)
+
+- Response Example
+```json
+{
+  "카테고리": "상의",
+  "최고가": [
+    { "브랜드": "A", "가격": "₩30,000" },
+    { "브랜드": "B", "가격": "₩30,000" }
+  ],
+  "최저가": [
+    { "브랜드": "C", "가격": "₩10,000" }
+  ]
+}
+```
+
+- Error Response
+```json
+{
+  "message": "카테고리 TOP 에 해당하는 상품이 없습니다.",
   "status": 400
 }
 ```

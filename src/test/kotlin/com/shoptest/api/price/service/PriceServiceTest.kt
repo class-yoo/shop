@@ -26,7 +26,7 @@ class PriceServiceTest {
     private val priceService = PriceService(categoryRepository, productRepository, messageProvider)
 
     @Test
-    fun `카테고리별 최저가 브랜드를 조회할 수 있다`() {
+    fun `카테고리별 최저가 브랜드를 조회`() {
         // given
         val mockData = listOf(
             Triple(CategoryType.TOP, "A", 1000),
@@ -47,7 +47,7 @@ class PriceServiceTest {
     }
 
     @Test
-    fun `모든 카테고리를 가진 브랜드 중 최저 총액 브랜드를 조회할 수 있다`() {
+    fun `모든 카테고리를 가진 브랜드 중 최저 총액 브랜드를 조회`() {
         // given
         val brandId = 1L
         val allCategories = CategoryType.entries
@@ -69,7 +69,7 @@ class PriceServiceTest {
     }
 
     @Test
-    fun `카테고리별 최고가, 최저가 브랜드를 조회할 수 있다`() {
+    fun `카테고리별 최고가, 최저가 브랜드를 조회`() {
         // given
         val categoryType = CategoryType.TOP
 

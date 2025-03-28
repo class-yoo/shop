@@ -50,7 +50,7 @@ class PriceControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `카테고리별 최고가, 최저가 브랜드를 조회할 수 있다`() {
+    fun `카테고리별 최고가, 최저가 브랜드를 조회 API`() {
         // given
         val categoryType = CategoryType.TOP
         val response = MaxMinPriceByCategoryResponse(
