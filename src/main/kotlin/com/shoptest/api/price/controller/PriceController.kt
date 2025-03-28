@@ -2,10 +2,13 @@ package com.shoptest.api.price.controller
 
 import com.shoptest.api.price.dto.CheapestPriceByCategoryResponse
 import com.shoptest.api.price.dto.CheapestTotalPriceByBrandResponse
+import com.shoptest.api.price.dto.MaxMinPriceByCategoryResponse
 import com.shoptest.api.price.service.PriceService
+import com.shoptest.domain.category.CategoryType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -23,6 +26,14 @@ class PriceController(
     @GetMapping("/cheapest-brand")
     fun getCheapestBrandDetail(): ResponseEntity<CheapestTotalPriceByBrandResponse> {
         val response = priceService.getCheapestTotalPriceBrand()
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/max-min")
+    fun getMaxMinPriceByCategory(
+        @RequestParam("category") categoryType: CategoryType
+    ): ResponseEntity<MaxMinPriceByCategoryResponse> {
+        val response = priceService.getMaxMinPriceProducts(categoryType)
         return ResponseEntity.ok(response)
     }
 }

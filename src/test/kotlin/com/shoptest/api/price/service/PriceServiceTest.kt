@@ -1,12 +1,17 @@
 package com.shoptest.api.price.service
 
+import com.shoptest.api.price.dto.BrandPriceDto
 import com.shoptest.api.price.dto.CheapestBrandPriceDto
 import com.shoptest.api.price.dto.CheapestPriceDto
 import com.shoptest.api.price.dto.CheapestTotalPriceByBrandResponse
 import com.shoptest.common.message.MessageProvider
+import com.shoptest.domain.brand.Brand
+import com.shoptest.domain.category.Category
 import com.shoptest.domain.category.CategoryType
 import com.shoptest.domain.category.repository.CategoryRepository
+import com.shoptest.domain.product.Product
 import com.shoptest.domain.product.repository.ProductRepository
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
@@ -61,5 +66,35 @@ class PriceServiceTest {
             CheapestBrandPriceDto(it.displayName, 1000)
         }
         result.detail.totalPrice shouldBe allCategories.size * 1000
+    }
+
+    @Test
+    fun `카테고리별 최고가, 최저가 브랜드를 조회할 수 있다`() {
+        // given
+        val categoryType = CategoryType.TOP
+
+        val maxProducts = listOf(
+            Product(brand = Brand(name = "A"), category = Category(type = CategoryType.TOP), price = 30000),
+            Product(brand = Brand(name = "B"), category = Category(type = CategoryType.TOP), price = 30000),
+        )
+        val minProducts = listOf(
+            Product(brand = Brand(name = "C"), category = Category(type = CategoryType.TOP), price = 10000),
+        )
+
+        `when`(productRepository.findMaxPriceProductsByCategory(categoryType)).thenReturn(maxProducts)
+        `when`(productRepository.findMinPriceProductsByCategory(categoryType)).thenReturn(minProducts)
+
+        // when
+        val result = priceService.getMaxMinPriceProducts(categoryType)
+
+        // then
+        result.category shouldBe categoryType.displayName
+        result.max shouldContainExactlyInAnyOrder listOf(
+            BrandPriceDto("A", 30000),
+            BrandPriceDto("B", 30000)
+        )
+        result.min shouldContainExactlyInAnyOrder listOf(
+            BrandPriceDto("C", 10000)
+        )
     }
 }

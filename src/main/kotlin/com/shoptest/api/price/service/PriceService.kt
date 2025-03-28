@@ -72,4 +72,18 @@ class PriceService(
         )
     }
 
+    fun getMaxMinPriceProducts(categoryType: CategoryType): MaxMinPriceByCategoryResponse {
+        val maxProducts = productRepository.findMaxPriceProductsByCategory(categoryType)
+        val minProducts = productRepository.findMinPriceProductsByCategory(categoryType)
+
+        return MaxMinPriceByCategoryResponse(
+            category = categoryType.displayName,
+            max = maxProducts.map {
+                BrandPriceDto(it.brand.name, it.price)
+            },
+            min = minProducts.map {
+                BrandPriceDto(it.brand.name, it.price)
+            }
+        )
+    }
 }

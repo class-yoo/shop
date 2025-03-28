@@ -4,6 +4,7 @@ package com.shoptest.domain.product.repository
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.shoptest.domain.brand.QBrand.brand
 import com.shoptest.domain.category.CategoryType
+import com.shoptest.domain.product.Product
 import com.shoptest.domain.product.QProduct.product
 
 class ProductQueryRepositoryImpl(
@@ -72,5 +73,37 @@ class ProductQueryRepositoryImpl(
             .from(brand)
             .where(brand.id.eq(brandId))
             .fetchOne()
+    }
+
+    override fun findMaxPriceProductsByCategory(categoryType: CategoryType): List<Product> {
+        val maxPrice = queryFactory
+            .select(product.price.max())
+            .from(product)
+            .where(product.category.type.eq(categoryType))
+            .fetchOne() ?: return emptyList()
+
+        return queryFactory
+            .selectFrom(product)
+            .where(
+                product.category.type.eq(categoryType),
+                product.price.eq(maxPrice)
+            )
+            .fetch()
+    }
+
+    override fun findMinPriceProductsByCategory(categoryType: CategoryType): List<Product> {
+        val minPrice = queryFactory
+            .select(product.price.min())
+            .from(product)
+            .where(product.category.type.eq(categoryType))
+            .fetchOne() ?: return emptyList()
+
+        return queryFactory
+            .selectFrom(product)
+            .where(
+                product.category.type.eq(categoryType),
+                product.price.eq(minPrice)
+            )
+            .fetch()
     }
 }
