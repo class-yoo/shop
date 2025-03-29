@@ -4,6 +4,7 @@ import com.shoptest.api.brand.dto.BrandCreateRequest
 import com.shoptest.api.brand.dto.BrandResponse
 import com.shoptest.api.brand.dto.BrandUpdateRequest
 import com.shoptest.api.brand.service.BrandService
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.whenever
@@ -24,15 +25,13 @@ class BrandControllerTest @Autowired constructor(
     @MockBean
     lateinit var brandService: BrandService
 
-    // 브랜드 생성 테스트
+    @DisplayName("브랜드 생성 성공")
     @Test
-    fun `브랜드 생성 테스트`() {
+    fun createBrand_success() {
         val brandName = "나이키"
         val request = BrandCreateRequest(name = brandName)
-
         val brandResponse = BrandResponse(id = 1L, name = brandName)
 
-        // 서비스에서 브랜드 생성 반환
         whenever(brandService.createBrand(request)).thenReturn(brandResponse)
 
         mockMvc.perform(post("/api/v1/brand")
@@ -43,15 +42,13 @@ class BrandControllerTest @Autowired constructor(
             .andExpect(jsonPath("$.id").value(1L))
     }
 
-    // 브랜드 수정 테스트
+    @DisplayName("브랜드 수정 성공")
     @Test
-    fun `브랜드 수정 테스트`() {
+    fun updateBrand_success() {
         val updatedName = "아디다스"
         val updatedRequest = BrandUpdateRequest(name = updatedName)
-
         val updatedBrand = BrandResponse(id = 1L, name = updatedName)
 
-        // 수정된 브랜드 반환
         whenever(brandService.updateBrand(1L, updatedRequest)).thenReturn(updatedBrand)
 
         mockMvc.perform(put("/api/v1/brand/1")
@@ -62,14 +59,12 @@ class BrandControllerTest @Autowired constructor(
             .andExpect(jsonPath("$.id").value(1L))
     }
 
-    // 브랜드 삭제 테스트
+    @DisplayName("브랜드 삭제 성공")
     @Test
-    fun `브랜드 삭제 테스트`() {
-        // 브랜드가 존재한다고 가정하고 삭제 처리
+    fun deleteBrand_success() {
         val brandId = 1L
         val responseMessage = "브랜드가 성공적으로 삭제되었습니다."
 
-        // 서비스에서 삭제 확인
         doNothing().`when`(brandService).deleteBrand(brandId)
 
         mockMvc.perform(delete("/api/v1/brand/$brandId"))
@@ -77,15 +72,16 @@ class BrandControllerTest @Autowired constructor(
             .andExpect(content().string(responseMessage))
     }
 
+    @DisplayName("브랜드 삭제 실패 - 존재하지 않는 브랜드")
     @Test
-    fun `브랜드 삭제 실패 테스트 - 존재하지 않는 브랜드`() {
-        val brandId = 99999999L  // 존재하지 않는 브랜드 ID
+    fun deleteBrand_notFound() {
+        val brandId = 99999999L
 
-        // 서비스에서 존재하지 않는 브랜드로 예외 발생
-        whenever(brandService.deleteBrand(brandId)).thenThrow(NoSuchElementException("브랜드를 찾을 수 없습니다."))
+        whenever(brandService.deleteBrand(brandId))
+            .thenThrow(NoSuchElementException("브랜드를 찾을 수 없습니다."))
 
         mockMvc.perform(delete("/api/v1/brand/$brandId"))
             .andExpect(status().isNotFound)
-            .andExpect(content().string("브랜드를 찾을 수 없습니다."))
+            .andExpect(jsonPath("$.message").value("브랜드를 찾을 수 없습니다."))
     }
 }

@@ -24,7 +24,7 @@ class PriceControllerTest @Autowired constructor(
     lateinit var priceService: PriceService
 
     @Test
-    fun `카테고리별 최저가 브랜드 조회 API`() {
+    fun `카테고리별 최저가 브랜드 조회 테스트`() {
         mockMvc.get("/api/v1/price/cheapest")
             .andExpect {
                 status { isOk() }
@@ -37,7 +37,7 @@ class PriceControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `최저 총액 브랜드 조회 API`() {
+    fun `최저 총액 브랜드 조회 테스트`() {
         mockMvc.get("/api/v1/price/cheapest-brand")
             .andExpect {
                 status { isOk() }
@@ -50,7 +50,7 @@ class PriceControllerTest @Autowired constructor(
     }
 
     @Test
-    fun `카테고리별 최고가, 최저가 브랜드를 조회 API`() {
+    fun `카테고리별 최고가, 최저가 브랜드를 조회 테스트`() {
         // given
         val categoryType = CategoryType.TOP
         val response = MaxMinPriceByCategoryResponse(

@@ -6,6 +6,7 @@ import com.shoptest.api.brand.dto.BrandUpdateRequest
 import com.shoptest.domain.brand.Brand
 import com.shoptest.domain.brand.repository.BrandRepository
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
 import org.mockito.kotlin.whenever
@@ -19,8 +20,9 @@ class BrandServiceTest {
         brandRepository: BrandRepository = mock(),
     ) = BrandService(brandRepository)
 
+    @DisplayName("브랜드 생성 성공")
     @Test
-    fun `브랜드 생성`() {
+    fun createBrand_success() {
         // given
         val brandRepository = mock<BrandRepository>()
         val service = brandService(brandRepository)
@@ -38,8 +40,9 @@ class BrandServiceTest {
         createdBrand shouldBe BrandResponse(id = 1L, name = brandName)
     }
 
+    @DisplayName("브랜드 수정 성공")
     @Test
-    fun `브랜드 수정`() {
+    fun updateBrand_success() {
         // given
         val brandRepository = mock<BrandRepository>()
         val service = brandService(brandRepository)
@@ -49,15 +52,17 @@ class BrandServiceTest {
         whenever(brandRepository.findById(savedBrand.id)).thenReturn(Optional.of(savedBrand))
 
         val updatedRequest = BrandUpdateRequest(name = "아디다스")
+
+        // when
         val updatedBrand = service.updateBrand(savedBrand.id, updatedRequest)
 
-        // then: 수정된 브랜드의 이름이 아디다스로 변경되었는지 확인
+        // then
         updatedBrand.name shouldBe "아디다스"
     }
 
-
+    @DisplayName("브랜드 삭제 성공")
     @Test
-    fun `브랜드 삭제`() {
+    fun deleteBrand_success() {
         // given
         val brandRepository = mock<BrandRepository>()
         val service = brandService(brandRepository)
@@ -67,7 +72,7 @@ class BrandServiceTest {
         whenever(brandRepository.existsById(savedBrand.id)).thenReturn(true)
 
         // when
-        service.deleteBrand(savedBrand.id)  // 실제로 deleteBrand 메소드 호출
+        service.deleteBrand(savedBrand.id)
 
         // then
         verify(brandRepository).deleteById(savedBrand.id)
