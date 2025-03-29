@@ -41,8 +41,8 @@ class PriceControllerTest @Autowired constructor(
                 jsonPath("$.상품목록").isArray
                 jsonPath("$.상품목록[0].카테고리").value("상의")
                 jsonPath("$.상품목록[0].브랜드").value("A")
-                jsonPath("$.상품목록[0].가격").value(1000)
-                jsonPath("$.총액").value(3000)
+                jsonPath("$.상품목록[0].가격").value("1,000")  // 가격을 문자열로 비교
+                jsonPath("$.총액").value("3,000")  // 총액도 문자열로 비교
             }
     }
 
@@ -69,8 +69,8 @@ class PriceControllerTest @Autowired constructor(
                 jsonPath("$.최저가.브랜드").value("무신사")
                 jsonPath("$.최저가.카테고리").isArray
                 jsonPath("$.최저가.카테고리[0].카테고리").value(CategoryType.entries[0].displayName)
-                jsonPath("$.최저가.카테고리[0].가격").value(1000)
-                jsonPath("$.최저가.총액").value(categoryItems.size * 1000)
+                jsonPath("$.최저가.카테고리[0].가격").value("1,000")  // 가격을 문자열로 비교
+                jsonPath("$.최저가.총액").value((categoryItems.size * 1000).toString())  // 총액을 문자열로 비교
             }
     }
 
@@ -93,11 +93,11 @@ class PriceControllerTest @Autowired constructor(
             status { isOk() }
             jsonPath("$.카테고리").value(categoryType.displayName)
             jsonPath("$.최고가[0].브랜드").value("A")
-            jsonPath("$.최고가[0].가격").value(30000)
+            jsonPath("$.최고가[0].가격").value("30,000")  // 가격을 문자열로 비교
             jsonPath("$.최고가[1].브랜드").value("B")
-            jsonPath("$.최고가[1].가격").value(30000)
+            jsonPath("$.최고가[1].가격").value("30,000")  // 가격을 문자열로 비교
             jsonPath("$.최저가[0].브랜드").value("C")
-            jsonPath("$.최저가[0].가격").value(10000)
+            jsonPath("$.최저가[0].가격").value("10,000")  // 가격을 문자열로 비교
         }
     }
 }
