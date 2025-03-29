@@ -11,7 +11,7 @@ class Brand(
     val id: Long = 0L,
 
     @Column(nullable = false, unique = true)
-    val name: String,
+    var name: String,
 
     @OneToMany(mappedBy = "brand", cascade = [CascadeType.ALL], orphanRemoval = true)
     val products: MutableList<Product> = mutableListOf()
