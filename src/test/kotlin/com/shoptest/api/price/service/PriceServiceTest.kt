@@ -76,11 +76,11 @@ class PriceServiceTest {
         val categoryType = CategoryType.TOP
 
         val maxProducts = listOf(
-            Product(brand = Brand(name = "A"), category = Category(type = CategoryType.TOP), price = 30000),
-            Product(brand = Brand(name = "B"), category = Category(type = CategoryType.TOP), price = 30000),
+            Product(name = "상품A", brand = Brand(name = "A"), category = Category(type = CategoryType.TOP), price = 30000),
+            Product(name = "상품B", brand = Brand(name = "B"), category = Category(type = CategoryType.TOP), price = 30000),
         )
         val minProducts = listOf(
-            Product(brand = Brand(name = "C"), category = Category(type = CategoryType.TOP), price = 10000),
+            Product(name = "상품C", brand = Brand(name = "C"), category = Category(type = CategoryType.TOP), price = 10000),
         )
 
         `when`(productRepository.findMaxPriceProductsByCategory(categoryType)).thenReturn(maxProducts)

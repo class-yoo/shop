@@ -48,15 +48,29 @@ class PriceControllerIntegrationTest @Autowired constructor(
 
         // 브랜드A: 모든 카테고리 1000원
         categories.forEach {
-            products += Product(brand = brandA, category = it, price = 1000)
+            products += Product(
+                name = "${brandA.name}의 ${it.type.name} 상품",
+                brand = brandA,
+                category = it,
+                price = 1000
+            )
         }
 
         // 브랜드B: 일부만 보유 (첫 번째만 500원)
-        products += Product(brand = brandB, category = categories.first(), price = 500)
+        products += Product(
+            name = "${brandB.name}의 ${categories.first().type.name} 상품",
+            brand = brandB,
+            category = categories.first(),
+            price = 500
+        )
 
         // 브랜드C: 최고가 용
-        products += Product(brand = brandC, category = categories.first(), price = 10_000)
-
+        products += Product(
+            name = "${brandC.name}의 ${categories.first().type.name} 상품",
+            brand = brandC,
+            category = categories.first(),
+            price = 10_000
+        )
         productRepository.saveAll(products)
     }
 

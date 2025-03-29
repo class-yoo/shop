@@ -25,6 +25,8 @@ class BrandControllerTest @Autowired constructor(
     @MockBean
     lateinit var brandService: BrandService
 
+    private val baseUrl = "/api/v1/brand"
+
     @DisplayName("브랜드 생성 성공")
     @Test
     fun createBrand_success() {
@@ -34,7 +36,7 @@ class BrandControllerTest @Autowired constructor(
 
         whenever(brandService.createBrand(request)).thenReturn(brandResponse)
 
-        mockMvc.perform(post("/api/v1/brand")
+        mockMvc.perform(post(baseUrl)
             .contentType("application/json")
             .content("""{"name": "$brandName"}"""))
             .andExpect(status().isCreated)
@@ -51,7 +53,7 @@ class BrandControllerTest @Autowired constructor(
 
         whenever(brandService.updateBrand(1L, updatedRequest)).thenReturn(updatedBrand)
 
-        mockMvc.perform(put("/api/v1/brand/1")
+        mockMvc.perform(put("$baseUrl/1")
             .contentType("application/json")
             .content("""{"name": "$updatedName"}"""))
             .andExpect(status().isOk)
@@ -67,7 +69,7 @@ class BrandControllerTest @Autowired constructor(
 
         doNothing().`when`(brandService).deleteBrand(brandId)
 
-        mockMvc.perform(delete("/api/v1/brand/$brandId"))
+        mockMvc.perform(delete("$baseUrl/$brandId"))
             .andExpect(status().isOk)
             .andExpect(content().string(responseMessage))
     }
@@ -80,7 +82,7 @@ class BrandControllerTest @Autowired constructor(
         whenever(brandService.deleteBrand(brandId))
             .thenThrow(NoSuchElementException("브랜드를 찾을 수 없습니다."))
 
-        mockMvc.perform(delete("/api/v1/brand/$brandId"))
+        mockMvc.perform(delete("$baseUrl/$brandId"))
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.message").value("브랜드를 찾을 수 없습니다."))
     }

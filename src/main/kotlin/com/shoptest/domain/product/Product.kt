@@ -4,14 +4,14 @@ import com.shoptest.domain.category.Category
 import jakarta.persistence.*
 
 @Entity
-@Table(
-    name = "products",
-    uniqueConstraints = [UniqueConstraint(columnNames = ["brand_id", "category_id"])]
-)
+@Table(name = "products")
 class Product(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0L,
+
+    @Column(nullable = false)
+    val name: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)
@@ -23,4 +23,15 @@ class Product(
 
     @Column(nullable = false)
     val price: Int
-)
+
+) {
+    fun withUpdated(name: String?, price: Int?): Product {
+        return Product(
+            id = this.id,
+            name = name ?: this.name,
+            price = price ?: this.price,
+            brand = this.brand,
+            category = this.category
+        )
+    }
+}

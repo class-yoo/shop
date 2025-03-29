@@ -98,3 +98,6 @@ docker ps | grep shop-app
 
 ## 3. 구현범위 설명
 
+### API Spec
+- http://localhost:{port}/swagger-ui/index.html
+  - e.g.) http://localhost:8080/swagger-ui/index.html
