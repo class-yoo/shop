@@ -8,12 +8,10 @@ import com.shoptest.domain.brand.repository.BrandRepository
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.*
-import org.mockito.kotlin.whenever
-import org.springframework.boot.test.context.SpringBootTest
+import org.mockito.kotlin.*
+
 import java.util.*
 
-@SpringBootTest
 class BrandServiceTest {
 
     private fun brandService(
@@ -25,20 +23,24 @@ class BrandServiceTest {
     fun createBrand_success() {
         // given
         val brandRepository = mock<BrandRepository>()
-        val service = brandService(brandRepository)
+        val service = BrandService(brandRepository)
 
         val brandName = "나이키"
         val request = BrandCreateRequest(name = brandName)
+        val savedBrand = Brand(id = 1L, name = brandName)
 
-        val savedBrand = Brand(id = 1L, name = request.name)
-        whenever(brandRepository.save(any())).thenReturn(savedBrand)
+        whenever(brandRepository.existsByName(brandName)).thenReturn(false)
+
+        whenever(brandRepository.save(any<Brand>())).thenReturn(savedBrand)
 
         // when
-        val createdBrand = service.createBrand(request)
+        val result = service.createBrand(request)
 
         // then
-        createdBrand shouldBe BrandResponse(id = 1L, name = brandName)
+        result shouldBe BrandResponse(id = 1L, name = brandName)
     }
+
+
 
     @DisplayName("브랜드 수정 성공")
     @Test
@@ -48,7 +50,6 @@ class BrandServiceTest {
         val service = brandService(brandRepository)
 
         val savedBrand = Brand(id = 1L, name = "나이키")
-
         whenever(brandRepository.findById(savedBrand.id)).thenReturn(Optional.of(savedBrand))
 
         val updatedRequest = BrandUpdateRequest(name = "아디다스")
@@ -68,7 +69,6 @@ class BrandServiceTest {
         val service = brandService(brandRepository)
         val savedBrand = Brand(id = 1L, name = "나이키")
 
-        whenever(brandRepository.findById(savedBrand.id)).thenReturn(Optional.of(savedBrand))
         whenever(brandRepository.existsById(savedBrand.id)).thenReturn(true)
 
         // when
