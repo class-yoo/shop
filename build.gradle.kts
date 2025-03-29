@@ -47,6 +47,9 @@ dependencies {
 	testImplementation("org.assertj:assertj-core:3.25.1")
 	testImplementation("io.kotest:kotest-assertions-core:5.8.0")
 	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+
+	// Swagger
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
 }
 
 kotlin {
