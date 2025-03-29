@@ -18,8 +18,12 @@
 git clone https://github.com/class-yoo/shop.git
 cd shop-test
 
-# 2. Docker build
+# 2. Docker build (프로젝트 루트 디렉토리)
 docker build -t shop-app .
+
+# 2-1. build 된 이미지 확인
+docker images | grep shop-app
+shop-app                  latest         6e2b4ebb1167   5 minutes ago   494MB
 
 # 3. Docker run 
 docker run -d \
@@ -32,6 +36,10 @@ docker run -d \
   -e SPRING_PROFILES_ACTIVE=local \
   -p 8089:8080 \
   shop-app
+
+# 3-1 실행중인 컨테이너 확인
+docker ps | grep shop-app
+1e707f89fecc   shop-app   "java -jar app.jar"   11 seconds ago   Up 10 seconds   0.0.0.0:8080->8080/tcp   determined_rosalind
 ```
 
 ---
@@ -73,8 +81,11 @@ OpenJDK 64-Bit Server VM Temurin-21+35 (build 21+35-LTS, mixed mode, sharing)
 # 로그출력으로 실행
 ./gradlew bootRun --args='--spring.profiles.active=local'
 
-# 데몬으로 실행
+# 데몬으로 실행 & 실행한 process(부트 서버) kill
 ./gradlew bootRun --args='--spring.profiles.active=local' > /dev/null 2>&1 &
+[1] 56718 # 실행된 PID
+
+pkill 56718
 ```
 
 ### 도커로 빌드 및 실행

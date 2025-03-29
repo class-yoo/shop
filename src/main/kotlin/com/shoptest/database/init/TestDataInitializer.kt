@@ -58,7 +58,6 @@ class TestDataInitializer(
                 val category = categories[idx]
                 val categoryType = category.type
 
-                // 랜덤하게 상품명 선택
                 val nameList = dummyProductNames[categoryType] ?: listOf("기본 상품")
                 val name = nameList.random()
 

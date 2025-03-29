@@ -29,7 +29,7 @@ class PriceControllerIntegrationTest @Autowired constructor(
     @BeforeEach
     fun setup() {
         productRepository.deleteAll()
-        categoryRepository.deleteAll() // 또는 truncate
+        categoryRepository.deleteAll()
 
         val savedBrands = mutableMapOf<String, Brand>()
         listOf("브랜드A", "브랜드B", "브랜드C").forEach {

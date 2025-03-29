@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.*
 @AutoConfigureMockMvc
 class ProductControllerTest @Autowired constructor(
     val mockMvc: MockMvc,
-    val objectMapper: ObjectMapper  // ObjectMapper 자동 주입
+    val objectMapper: ObjectMapper
 ) {
 
     @MockBean
@@ -51,12 +51,12 @@ class ProductControllerTest @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(request)
         }.andExpect {
-            status { isOk() }
+            status { isCreated() }
             jsonPath("$.id") { value(100) }
             jsonPath("$.name") { value("검정 가방") }
             jsonPath("$.brandId") { value(1) }
             jsonPath("$.categoryId") { value(2) }
-            jsonPath("$.price") { value("12,000") }  // 가격을 문자열로 비교
+            jsonPath("$.price") { value(12000) }
         }
     }
 
@@ -81,12 +81,12 @@ class ProductControllerTest @Autowired constructor(
 
         mockMvc.put("$baseUrl/101") {
             contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(request)  // 객체를 JSON으로 변환해서 요청 본문에 추가
+            content = objectMapper.writeValueAsString(request)
         }.andExpect {
             status { isOk() }
             jsonPath("$.id") { value(101) }
             jsonPath("$.name") { value("네이비 백팩") }
-            jsonPath("$.price") { value("18,000") }  // 정수로 비교
+            jsonPath("$.price") { value(18000) }
         }
     }
 

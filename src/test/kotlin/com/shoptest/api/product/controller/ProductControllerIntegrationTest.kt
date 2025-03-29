@@ -65,7 +65,7 @@ class ProductControllerIntegrationTest {
             jsonPath("$.name") { value("검정 가방") }
             jsonPath("$.brandId") { value(brand.id) }
             jsonPath("$.categoryId") { value(category.id) }
-            jsonPath("$.price") { value("12,000") }
+            jsonPath("$.price") { value(12000) }
         }
     }
 
@@ -88,7 +88,7 @@ class ProductControllerIntegrationTest {
             status { isOk() }
             jsonPath("$.id") { value(savedProduct.id) }
             jsonPath("$.name") { value("네이비 백팩") }
-            jsonPath("$.price") { value("18,000") }
+            jsonPath("$.price") { value(18000) }
         }
     }
 

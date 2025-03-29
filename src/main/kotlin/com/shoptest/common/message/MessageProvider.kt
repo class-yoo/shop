@@ -10,7 +10,7 @@ class MessageProvider(
 ) {
 
     fun get(code: String, vararg args: Any?): String {
-        val locale = LocaleContextHolder.getLocale() // 현재 요청의 Locale (기본 ko)
+        val locale = LocaleContextHolder.getLocale()
         return messageSource.getMessage(code, args, locale)
     }
 }

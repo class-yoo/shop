@@ -1,4 +1,3 @@
-// ProductQueryRepositoryImpl.kt
 package com.shoptest.domain.product.repository
 
 import com.querydsl.jpa.impl.JPAQueryFactory
