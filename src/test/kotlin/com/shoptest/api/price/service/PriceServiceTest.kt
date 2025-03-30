@@ -3,26 +3,23 @@ package com.shoptest.api.price.service
 import com.shoptest.api.price.dto.BrandPriceDto
 import com.shoptest.api.price.dto.CheapestBrandPriceDto
 import com.shoptest.api.price.dto.CheapestPriceDto
-import com.shoptest.api.price.dto.CheapestTotalPriceByBrandResponse
-import com.shoptest.common.message.MessageProvider
 import com.shoptest.domain.brand.Brand
 import com.shoptest.domain.category.Category
 import com.shoptest.domain.category.CategoryType
-import com.shoptest.domain.category.repository.CategoryRepository
 import com.shoptest.domain.product.Product
 import com.shoptest.domain.product.repository.ProductRepository
+import com.shoptest.domain.product.repository.dto.CheapestPriceResult
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
+import org.mockito.kotlin.whenever
 
 class PriceServiceTest {
 
-    private val categoryRepository = mock(CategoryRepository::class.java)
     private val productRepository = mock(ProductRepository::class.java)
-    private val messageProvider = mock(MessageProvider::class.java)
-    private val priceService = PriceService(categoryRepository, productRepository, messageProvider)
+    private val priceService = PriceService(productRepository)
 
     @Test
     @DisplayName("카테고리별 최저가 브랜드를 조회")
@@ -51,22 +48,37 @@ class PriceServiceTest {
     fun getCheapestTotalPriceBrand() {
         // given
         val brandId = 1L
+        val brandName = "무신사"
         val allCategories = CategoryType.entries
-        val priceByCategory = allCategories.map { it to 1000 }
+        val price = 1000
 
-        `when`(productRepository.findAllBrandIdsHavingProducts()).thenReturn(listOf(brandId))
-        `when`(productRepository.findCheapestPricePerCategoryByBrandId(brandId)).thenReturn(priceByCategory)
-        `when`(productRepository.findBrandNameById(brandId)).thenReturn("무신사")
+        val cheapestPriceResults = allCategories.map {
+            CheapestPriceResult(
+                brandId = brandId,
+                categoryType = it,
+                price = price
+            )
+        }
+
+        // Mocked repository responses
+        whenever(productRepository.findBrandIdsHavingAllCategories(allCategories.size))
+            .thenReturn(listOf(brandId))
+
+        whenever(productRepository.findCheapestPricesByBrandIds(listOf(brandId)))
+            .thenReturn(cheapestPriceResults)
+
+        whenever(productRepository.findBrandNameById(brandId))
+            .thenReturn(brandName)
 
         // when
-        val result: CheapestTotalPriceByBrandResponse = priceService.getCheapestTotalPriceBrand()
+        val result = priceService.getCheapestTotalPriceBrand()
 
         // then
-        result.detail.brand shouldBe "무신사"
+        result.detail.brand shouldBe brandName
         result.detail.items shouldBe allCategories.map {
-            CheapestBrandPriceDto(it.displayName, 1000)
+            CheapestBrandPriceDto(it.displayName, price)
         }
-        result.detail.totalPrice shouldBe allCategories.size * 1000
+        result.detail.totalPrice shouldBe allCategories.size * price
     }
 
     @Test

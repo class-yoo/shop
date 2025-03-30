@@ -1,69 +1,72 @@
 package com.shoptest.domain.product.repository
 
+import com.querydsl.core.types.Projections
+import com.querydsl.core.types.dsl.Expressions
+import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.shoptest.domain.brand.QBrand.brand
 import com.shoptest.domain.category.CategoryType
+import com.shoptest.domain.category.QCategory.category
 import com.shoptest.domain.product.Product
+import com.shoptest.domain.product.QProduct
 import com.shoptest.domain.product.QProduct.product
+import com.shoptest.domain.product.repository.dto.CheapestPriceResult
 
 class ProductQueryRepositoryImpl(
     private val queryFactory: JPAQueryFactory
 ) : ProductQueryRepository {
 
     override fun findLowestPriceBrandPerCategory(): List<Triple<CategoryType, String, Int>> {
-        return CategoryType.entries.mapNotNull { categoryType ->
-            val minPrice = queryFactory
-                .select(product.price.min())
-                .from(product)
-                .where(product.category.type.eq(categoryType))
-                .fetchOne() ?: return@mapNotNull null
+        val subProduct = QProduct("sub")
 
-            val result = queryFactory
-                .select(product.category.type, product.brand.name, product.price)
-                .from(product)
-                .where(
-                    product.category.type.eq(categoryType),
-                    product.price.eq(minPrice)
-                )
-                .limit(1)
-                .fetchFirst()
-
-            result?.let {
-                val type = it.get(product.category.type)
-                val brand = it.get(product.brand.name)
+        return queryFactory
+            .select(product.category.type, product.brand.name, product.price)
+            .from(product)
+            .join(product.category, category)
+            .join(product.brand, brand)
+            .where(
+                Expressions.list(product.category.id, product.price)
+                    .`in`(
+                        JPAExpressions
+                            .select(subProduct.category.id, subProduct.price.min())
+                            .from(subProduct)
+                            .groupBy(subProduct.category.id)
+                    )
+            )
+            .fetch()
+            .mapNotNull {
+                val categoryType = it.get(product.category.type)
+                val brandName = it.get(product.brand.name)
                 val price = it.get(product.price)
-                if (type != null && brand != null && price != null) {
-                    Triple(type, brand, price)
-                } else {
-                    null
-                }
+                if (categoryType != null && brandName != null && price != null) {
+                    Triple(categoryType, brandName, price)
+                } else null
             }
-        }
     }
 
-
-    override fun findAllBrandIdsHavingProducts(): List<Long> {
+    override fun findBrandIdsHavingAllCategories(requiredCategoryCount: Int): List<Long> {
         return queryFactory
             .select(product.brand.id)
-            .distinct()
             .from(product)
-            .join(product.brand, brand)
+            .groupBy(product.brand.id)
+            .having(product.category.type.countDistinct().eq(requiredCategoryCount.toLong()))
             .fetch()
     }
 
-    override fun findCheapestPricePerCategoryByBrandId(brandId: Long): List<Pair<CategoryType, Int>> {
-        return CategoryType.entries.mapNotNull { categoryType ->
-            val cheapestPrice = queryFactory
-                .select(product.price.min())
-                .from(product)
-                .where(
-                    product.brand.id.eq(brandId),
-                    product.category.type.eq(categoryType)
+    override fun findCheapestPricesByBrandIds(brandIds: List<Long>): List<CheapestPriceResult> {
+        return queryFactory
+            .select(
+                Projections.constructor(
+                    CheapestPriceResult::class.java,
+                    product.brand.id,
+                    product.category.type,
+                    product.price.min()
                 )
-                .fetchOne()
-
-            if (cheapestPrice != null) categoryType to cheapestPrice else null
-        }
+            )
+            .from(product)
+            .where(product.brand.id.`in`(brandIds))
+            .groupBy(product.brand.id, product.category.type)
+            .fetch()
     }
 
     override fun findBrandNameById(brandId: Long): String? {
@@ -75,33 +78,31 @@ class ProductQueryRepositoryImpl(
     }
 
     override fun findMaxPriceProductsByCategory(categoryType: CategoryType): List<Product> {
-        val maxPrice = queryFactory
+        val subquery = JPAExpressions
             .select(product.price.max())
             .from(product)
             .where(product.category.type.eq(categoryType))
-            .fetchOne() ?: return emptyList()
 
         return queryFactory
             .selectFrom(product)
             .where(
                 product.category.type.eq(categoryType),
-                product.price.eq(maxPrice)
+                product.price.eq(subquery)
             )
             .fetch()
     }
 
     override fun findMinPriceProductsByCategory(categoryType: CategoryType): List<Product> {
-        val minPrice = queryFactory
+        val subquery = JPAExpressions
             .select(product.price.min())
             .from(product)
             .where(product.category.type.eq(categoryType))
-            .fetchOne() ?: return emptyList()
 
         return queryFactory
             .selectFrom(product)
             .where(
                 product.category.type.eq(categoryType),
-                product.price.eq(minPrice)
+                product.price.eq(subquery)
             )
             .fetch()
     }
