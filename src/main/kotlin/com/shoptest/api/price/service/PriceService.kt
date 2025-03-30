@@ -2,24 +2,32 @@ package com.shoptest.api.price.service
 
 import com.shoptest.api.price.dto.*
 import com.shoptest.domain.category.CategoryType
+import com.shoptest.domain.category.repository.CategoryRepository
 import com.shoptest.domain.product.repository.ProductRepository
 import org.springframework.stereotype.Service
 
 @Service
 class PriceService(
     private val productRepository: ProductRepository,
+    private val categoryRepository: CategoryRepository
 ) {
 
     fun getCheapestPriceBrandPerCategory(): CheapestPriceByCategoryResponse {
-        val data = productRepository.findLowestPriceBrandPerCategory()
+        val rawData = productRepository.findLowestPriceBrandPerCategory()
 
-        val items = data
-            .sortedWith(compareBy({ CategoryType.entries.indexOf(it.first) }, { it.second }))
-            .map { (categoryType, brand, price) ->
+        val grouped = rawData
+            .groupBy { it.first } // CategoryType
+            .mapValues { (_, list) ->
+                list.sortedBy { it.second }.last()
+            }
+
+        val items = grouped.entries
+            .sortedBy { CategoryType.entries.indexOf(it.key) }
+            .map { (categoryType, triple) ->
                 CheapestPriceDto(
                     category = categoryType.displayName,
-                    brand = brand,
-                    price = price
+                    brand = triple.second,
+                    price = triple.third
                 )
             }
 
@@ -31,15 +39,21 @@ class PriceService(
         )
     }
 
-    fun getCheapestTotalPriceBrand(): CheapestTotalPriceByBrandResponse {
-        val requiredCategoryCount = CategoryType.entries.size
-        val brandIds = productRepository.findBrandIdsHavingAllCategories(requiredCategoryCount)
 
+    fun getCheapestTotalPriceBrand(): CheapestTotalPriceByBrandResponse {
+        val requiredCategoryCount = categoryRepository.count().toInt()
+        val brandIds = productRepository.findBrandIdsHavingAllCategories(requiredCategoryCount)
         val rawResults = productRepository.findCheapestPricesByBrandIds(brandIds)
+
+        val categoryMap = categoryRepository.findAll()
+            .associateBy { it.id }
 
         val groupedByBrand = rawResults.groupBy { it.brandId }
             .mapValues { entry ->
-                entry.value.map { it.categoryType to it.price }
+                entry.value.mapNotNull { result ->
+                    val categoryType = categoryMap[result.categoryId]?.type
+                    categoryType?.let { it to result.price }
+                }
             }
 
         val (brandId, categoryPrices, totalPrice) = groupedByBrand
@@ -61,18 +75,19 @@ class PriceService(
         )
     }
 
+
     fun getMaxMinPriceProducts(categoryType: CategoryType): MaxMinPriceByCategoryResponse {
-        val maxProducts = productRepository.findMaxPriceProductsByCategory(categoryType)
-        val minProducts = productRepository.findMinPriceProductsByCategory(categoryType)
+        val category = categoryRepository.findByType(categoryType)
+            ?: throw RuntimeException("해당 카테고리를 찾을 수 없습니다: $categoryType")
+
+        val maxProducts = productRepository.findMaxPriceProductsByCategoryId(category.id)
+        val minProducts = productRepository.findMinPriceProductsByCategoryId(category.id)
 
         return MaxMinPriceByCategoryResponse(
             category = categoryType.displayName,
-            max = maxProducts.map {
-                BrandPriceDto(it.brand.name, it.price)
-            },
-            min = minProducts.map {
-                BrandPriceDto(it.brand.name, it.price)
-            }
+            max = maxProducts.map { BrandPriceDto(it.brand.name, it.price) },
+            min = minProducts.map { BrandPriceDto(it.brand.name, it.price) }
         )
     }
+
 }

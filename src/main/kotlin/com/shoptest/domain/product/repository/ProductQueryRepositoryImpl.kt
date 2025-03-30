@@ -49,7 +49,7 @@ class ProductQueryRepositoryImpl(
             .select(product.brand.id)
             .from(product)
             .groupBy(product.brand.id)
-            .having(product.category.type.countDistinct().eq(requiredCategoryCount.toLong()))
+            .having(product.category.id.countDistinct().eq(requiredCategoryCount.toLong()))
             .fetch()
     }
 
@@ -59,13 +59,13 @@ class ProductQueryRepositoryImpl(
                 Projections.constructor(
                     CheapestPriceResult::class.java,
                     product.brand.id,
-                    product.category.type,
+                    product.category.id,
                     product.price.min()
                 )
             )
             .from(product)
             .where(product.brand.id.`in`(brandIds))
-            .groupBy(product.brand.id, product.category.type)
+            .groupBy(product.brand.id, product.category.id)
             .fetch()
     }
 
@@ -77,31 +77,31 @@ class ProductQueryRepositoryImpl(
             .fetchOne()
     }
 
-    override fun findMaxPriceProductsByCategory(categoryType: CategoryType): List<Product> {
+    override fun findMaxPriceProductsByCategoryId(categoryId: Long): List<Product> {
         val subquery = JPAExpressions
             .select(product.price.max())
             .from(product)
-            .where(product.category.type.eq(categoryType))
+            .where(product.category.id.eq(categoryId))
 
         return queryFactory
             .selectFrom(product)
             .where(
-                product.category.type.eq(categoryType),
+                product.category.id.eq(categoryId),
                 product.price.eq(subquery)
             )
             .fetch()
     }
 
-    override fun findMinPriceProductsByCategory(categoryType: CategoryType): List<Product> {
+    override fun findMinPriceProductsByCategoryId(categoryId: Long): List<Product> {
         val subquery = JPAExpressions
             .select(product.price.min())
             .from(product)
-            .where(product.category.type.eq(categoryType))
+            .where(product.category.id.eq(categoryId))
 
         return queryFactory
             .selectFrom(product)
             .where(
-                product.category.type.eq(categoryType),
+                product.category.id.eq(categoryId),
                 product.price.eq(subquery)
             )
             .fetch()

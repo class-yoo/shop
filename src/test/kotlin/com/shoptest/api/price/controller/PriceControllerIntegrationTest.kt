@@ -101,7 +101,7 @@ class PriceControllerIntegrationTest @Autowired constructor(
     @DisplayName("카테고리별 최고가, 최저가 브랜드 조회")
     fun getMaxMinPriceProducts() {
         mockMvc.get("/api/v1/price/max-min") {
-            param("category", "TOP")
+            param("category", "상의")
         }.andExpect {
             status { isOk() }
             jsonPath("$.카테고리") { value("상의") }

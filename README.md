@@ -188,7 +188,20 @@ docker ps | grep shop-app
 
 ## API 로직 설명
 각 구간에 캐싱관련 로직은 제외 했습니다. 1,2,3번 API의 경우 캐싱하여 일정시간동안 제공해주면 좀 더 효율적일 것으로 보입니다.
-각 Service, Controller 함수의 유닛테스트를 작성하고, Controller 함수의 통합 테스트 작성을 했습니다. 
+각 Service, Controller 함수의 유닛테스트를 작성하고, Controller 함수의 통합 테스트 작성을 했습니다.
+
+API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라이언트에서 파싱등의 과정을 단순하게 만들 수 있지만 요청, 응답에 대한 결과만 확인하면 되는 구조라 생략했습니다.
+
+```shell
+# e.g.
+{
+  "code": "SUCCESS",
+  "message": "요청이 성공적으로 처리되었습니다.",
+  "data": {
+    ...
+  }
+}
+```
 
 ### API Spec
 - `http://localhost:{port}/swagger-ui/index.html`
@@ -200,6 +213,7 @@ docker ps | grep shop-app
   - [CheapestPriceByCategoryResponse.kt](src/main/kotlin/com/shoptest/api/price/dto/CheapestPriceByCategoryResponse.kt)
 - 로직 설명
   - CategoryType.entries를 순회하며 각 카테고리에 대해 price의 최솟값을 구하는 서브쿼리를 작성하고, 해당 카테고리에서 해당 최저가를 가진 상품을 하나만 조회합니다
+  - 너무 많은 row를 조회하여 서버에서 처리하기에는 부담이 되기에 쿼리로 조건에 맞게 조회 후 정렬 및 중복가격 필터링은 Service Layer에서 진행합니다.
   - 응답 형식이 하나의 브랜드만 제공하기에, 각 카테고리별로 단일 상품가격만 제공합니다.
   - products table에 category_id와 price에 복합 인덱스를 추가하여 조회속도 향상
 - 관련 파일
@@ -215,7 +229,7 @@ docker ps | grep shop-app
   - [CheapestTotalPriceByBrandResponse.kt](src/main/kotlin/com/shoptest/api/price/dto/CheapestTotalPriceByBrandResponse.kt)
 - 로직 설명
   - 상품을 보유한 카테고리 수가 전체 카테고리 수와 동일한 브랜드 ID만 추출하여, 각 브랜드 ID에 대해 카테고리별 MIN(price) 상품 가격을 한 번에 가져옵니다. 
-  - 브랜드별로 카테고리별 가격들을 묶고, 총합 기준 MIN(price) 브랜드를 선별합니다.
+  - 브랜드별로 카테고리별 가격들을 묶고, 총합 기준 MIN(price)인 브랜드를 선별합니다.
 - 관련 파일
   - [PriceController.kt](src/main/kotlin/com/shoptest/api/price/controller/PriceController.kt)
   - [PriceService.kt](src/main/kotlin/com/shoptest/api/price/service/PriceService.kt)
@@ -244,6 +258,8 @@ docker ps | grep shop-app
 - 로직설명
   - 브랜드 관련 CUD 로직 구현
 
+---
+
 - 상품 관련 DTO
   - [ProductCreateRequest.kt](src/main/kotlin/com/shoptest/api/product/dto/ProductCreateRequest.kt)
   - [ProductResponse.kt](src/main/kotlin/com/shoptest/api/product/dto/ProductResponse.kt)
@@ -259,11 +275,80 @@ docker ps | grep shop-app
 ```
 
 ### API 호출 테스트
+curl을 사용하여 호출 테스트를 진행합니다.
 
-- 1. 카테고리 별 최저가격 브랜드와 상품 가격, 총액을 조회하는 API
+#### 1. 카테고리 별 최저가격 브랜드와 상품 가격, 총액을 조회하는 API
+```shell
+curl -X GET http://localhost:8080/api/v1/price/cheapest
+```
 
-- 2.단일 브랜드로 모든 카테고리 상품을 구매할 때 최저가격에 판매하는 브랜드와 카테고리의 상품가격, 총액을 조회하는 API
+#### 2. 단일 브랜드로 모든 카테고리 상품을 구매할 때 최저가격에 판매하는 브랜드와 카테고리의 상품가격, 총액을 조회하는 API
+```shell
+curl -X GET http://localhost:8080/api/v1/price/cheapest-brand
+```
 
-- 3.카테고리 이름으로 최저, 최고 가격 브랜드와 상품 가격을 조회하는 API
+#### 3. 카테고리 이름으로 최저, 최고 가격 브랜드와 상품 가격을 조회하는 API
+```shell
+curl -G "http://localhost:8080/api/v1/price/max-min" \
+     --data-urlencode "category=상의"
+```
 
-- 4. 브랜드 및 상품을 추가 / 업데이트 / 삭제하는 API
+#### 4. 브랜드 및 상품을 추가 / 업데이트 / 삭제하는 API
+
+브랜드 생성
+```shell
+curl -X POST http://localhost:8080/api/v1/brand \
+     -H "Content-Type: application/json" \
+     -d '{
+           "name": "Musinsa"
+         }'
+```
+
+브랜드 수정
+```shell
+curl -X PUT http://localhost:8080/api/v1/brand/1 \
+     -H "Content-Type: application/json" \
+     -d '{
+           "name": "UpdatedBrandName"
+         }'
+```
+
+브랜드 삭제
+```shell
+curl -X DELETE http://localhost:8080/api/v1/brand/2
+```
+
+브랜드 조회
+```shell
+curl -X GET http://localhost:8080/api/v1/brand/1
+```
+
+---
+상품생성
+```shell
+curl -X POST http://localhost:8080/api/v1/products \
+     -H "Content-Type: application/json" \
+     -d '{
+           "name": "T-Shirt",
+           "price": 19900,
+           "brandId": 1,
+           "categoryId": 1
+         }'
+```
+
+상품 수정
+```shell
+curl -X PUT http://localhost:8080/api/v1/products/1 \
+     -H "Content-Type: application/json" \
+     -d '{
+           "name": "Updated Product Name",
+           "price": 24900,
+           "brandId": 1,
+           "categoryId": 1
+         }'
+```
+
+상품삭제
+```shell
+curl -X DELETE http://localhost:8080/api/v1/products/1
+```

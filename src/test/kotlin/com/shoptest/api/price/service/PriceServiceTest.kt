@@ -6,6 +6,7 @@ import com.shoptest.api.price.dto.CheapestPriceDto
 import com.shoptest.domain.brand.Brand
 import com.shoptest.domain.category.Category
 import com.shoptest.domain.category.CategoryType
+import com.shoptest.domain.category.repository.CategoryRepository
 import com.shoptest.domain.product.Product
 import com.shoptest.domain.product.repository.ProductRepository
 import com.shoptest.domain.product.repository.dto.CheapestPriceResult
@@ -19,7 +20,8 @@ import org.mockito.kotlin.whenever
 class PriceServiceTest {
 
     private val productRepository = mock(ProductRepository::class.java)
-    private val priceService = PriceService(productRepository)
+    private val categoryRepository = mock(CategoryRepository::class.java)
+    private val priceService = PriceService(productRepository, categoryRepository)
 
     @Test
     @DisplayName("카테고리별 최저가 브랜드를 조회")
@@ -51,19 +53,27 @@ class PriceServiceTest {
         // given
         val brandId = 1L
         val brandName = "무신사"
-        val allCategories = CategoryType.entries
         val price = 1000
 
-        val cheapestPriceResults = allCategories.map {
+        val allCategories = CategoryType.entries
+        val categoryList = allCategories.mapIndexed { index, type ->
+            Category(id = (index + 1).toLong(), type = type)
+        }
+
+        val cheapestPriceResults = categoryList.map {
             CheapestPriceResult(
                 brandId = brandId,
-                categoryType = it,
+                categoryId = it.id,
                 price = price
             )
         }
 
-        // Mocked repository responses
-        whenever(productRepository.findBrandIdsHavingAllCategories(allCategories.size))
+        val categoryMap = categoryList.associateBy { it.id }
+
+        whenever(categoryRepository.findAll()).thenReturn(categoryList)
+        whenever(categoryRepository.count()).thenReturn(categoryList.size.toLong())
+
+        whenever(productRepository.findBrandIdsHavingAllCategories(categoryList.size))
             .thenReturn(listOf(brandId))
 
         whenever(productRepository.findCheapestPricesByBrandIds(listOf(brandId)))
@@ -88,17 +98,23 @@ class PriceServiceTest {
     fun getMaxMinPriceProducts() {
         // given
         val categoryType = CategoryType.TOP
+        val categoryId = 10L
+        val category = Category(id = categoryId, type = categoryType)
 
         val maxProducts = listOf(
-            Product(name = "상품A", brand = Brand(name = "A"), category = Category(type = CategoryType.TOP), price = 30000),
-            Product(name = "상품B", brand = Brand(name = "B"), category = Category(type = CategoryType.TOP), price = 30000),
+            Product(name = "상품A", brand = Brand(name = "A"), category = category, price = 30000),
+            Product(name = "상품B", brand = Brand(name = "B"), category = category, price = 30000),
         )
         val minProducts = listOf(
-            Product(name = "상품C", brand = Brand(name = "C"), category = Category(type = CategoryType.TOP), price = 10000),
+            Product(name = "상품C", brand = Brand(name = "C"), category = category, price = 10000),
         )
 
-        `when`(productRepository.findMaxPriceProductsByCategory(categoryType)).thenReturn(maxProducts)
-        `when`(productRepository.findMinPriceProductsByCategory(categoryType)).thenReturn(minProducts)
+        // 카테고리 조회 mock
+        whenever(categoryRepository.findByType(categoryType)).thenReturn(category)
+
+        // 상품 조회 mock
+        whenever(productRepository.findMaxPriceProductsByCategoryId(categoryId)).thenReturn(maxProducts)
+        whenever(productRepository.findMinPriceProductsByCategoryId(categoryId)).thenReturn(minProducts)
 
         // when
         val result = priceService.getMaxMinPriceProducts(categoryType)

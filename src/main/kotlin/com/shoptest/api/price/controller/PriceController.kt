@@ -62,10 +62,12 @@ class PriceController(
     )
     @GetMapping("/max-min")
     fun getMaxMinPriceByCategory(
-        @Parameter(description = "카테고리명", example = "TOP")
-        @RequestParam("category") categoryType: CategoryType
+        @Parameter(description = "카테고리명", example = "상의")
+        @RequestParam("category") categoryName: String
     ): ResponseEntity<MaxMinPriceByCategoryResponse> {
-        val response = priceService.getMaxMinPriceProducts(categoryType)
+        val response = priceService.getMaxMinPriceProducts(
+            CategoryType.fromDisplayName(categoryName)
+        )
         return ResponseEntity.ok(response)
     }
 }

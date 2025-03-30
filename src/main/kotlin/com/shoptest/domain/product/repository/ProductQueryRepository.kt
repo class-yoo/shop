@@ -9,6 +9,6 @@ interface ProductQueryRepository {
     fun findCheapestPricesByBrandIds(brandIds: List<Long>): List<CheapestPriceResult>
     fun findBrandNameById(brandId: Long): String?
     fun findLowestPriceBrandPerCategory(): List<Triple<CategoryType, String, Int>>
-    fun findMaxPriceProductsByCategory(categoryType: CategoryType): List<Product>
-    fun findMinPriceProductsByCategory(categoryType: CategoryType): List<Product>
+    fun findMaxPriceProductsByCategoryId(categoryId: Long): List<Product>
+    fun findMinPriceProductsByCategoryId(categoryId: Long): List<Product>
 }

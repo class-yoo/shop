@@ -88,7 +88,7 @@ class PriceControllerTest @Autowired constructor(
 
         // when & then
         mockMvc.get("/api/v1/price/max-min") {
-            param("category", categoryType.name)
+            param("category", categoryType.displayName)
         }.andExpect {
             status { isOk() }
             jsonPath("$.카테고리").value(categoryType.displayName)
