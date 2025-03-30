@@ -14,7 +14,7 @@ class PriceService(
         val data = productRepository.findLowestPriceBrandPerCategory()
 
         val items = data
-            .sortedWith(compareBy({ it.first.name }, { it.second }))
+            .sortedWith(compareBy({ CategoryType.entries.indexOf(it.first) }, { it.second }))
             .map { (categoryType, brand, price) ->
                 CheapestPriceDto(
                     category = categoryType.displayName,
@@ -30,7 +30,6 @@ class PriceService(
             totalPrice = totalPrice
         )
     }
-
 
     fun getCheapestTotalPriceBrand(): CheapestTotalPriceByBrandResponse {
         val requiredCategoryCount = CategoryType.entries.size

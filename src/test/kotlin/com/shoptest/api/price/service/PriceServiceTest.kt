@@ -40,7 +40,9 @@ class PriceServiceTest {
         result.items shouldBe listOf(
             CheapestPriceDto("상의", "A", 1000),
             CheapestPriceDto("아우터", "B", 2000)
-        )
+        ).sortedWith(compareBy {
+            CategoryType.entries.indexOf(CategoryType.fromDisplayName(it.category))
+        })
     }
 
     @Test
