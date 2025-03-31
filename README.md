@@ -284,6 +284,8 @@ API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라
 ### API 호출 테스트
 curl을 사용하여 호출 테스트를 진행합니다.
 
+jq가 설치된 상태라면 파이프라인으로 `| jq`를 붙여서 가독성을 높여주세요
+
 #### 1. 카테고리 별 최저가격 브랜드와 상품 가격, 총액을 조회하는 API
 ```shell
 curl -X GET http://localhost:8080/api/v1/price/cheapest
@@ -296,8 +298,13 @@ curl -X GET http://localhost:8080/api/v1/price/cheapest-brand
 
 #### 3. 카테고리 이름으로 최저, 최고 가격 브랜드와 상품 가격을 조회하는 API
 ```shell
+# 혹시 해당 명렁어가 정상동작하지 않는 경우 인코딩 이슈일 수 있습니다.
+# 그런경우, 바로 아래의 브라우저에서 아래의 url로 호출해주세요.
 curl -G http://localhost:8080/api/v1/price/max-min \
      --data-urlencode "category=상의"
+
+# 브라우저에서 아래 url로 호출
+http://localhost:8080/api/v1/price/max-min?category=%EC%83%81%EC%9D%98
 ```
 
 #### 4. 브랜드 및 상품을 추가 / 업데이트 / 삭제하는 API
