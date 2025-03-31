@@ -217,7 +217,7 @@ API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라
   - [CheapestPriceByCategoryResponse.kt](src/main/kotlin/com/shoptest/api/price/dto/CheapestPriceByCategoryResponse.kt)
 - 로직 설명
   - product 테이블의 카테고리별 최저가를 가진 row를 구하는 서브쿼리를 작성하고, 서브쿼리를 이용하여 해당 카테고리의 해최저가를 가진 상품(product)을 조회합니다.
-  - 너무 많은 row를 조회하여 서버에서 처리하기에는 부담이 되기에 쿼리로 조건에 맞게 조회 후 정렬 및 중복가격 필터링은 Service Layer에서 진행합니다.
+  - 너무 많은 row를 조회하여 서버에서 처리하기에는 메모리에 부담이 되기에 쿼리로 조건에 맞게 DB에서 조회 후 정렬 및 중복가격 필터링은 Service Layer에서 진행합니다.
   - 응답 형식이 하나의 브랜드만 제공하기에, 각 카테고리별로 단일 상품가격만 제공합니다.
   - products table에 category_id와 price에 복합 인덱스를 추가하여 조회속도 향상
 - 관련 파일
