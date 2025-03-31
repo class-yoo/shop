@@ -193,8 +193,6 @@ docker ps | grep shop-app
 API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라이언트에서 파싱등의 과정을 단순하게 만들 수 있지만 
 우선은 요청, 응답에 대한 결과만 확인하면 되는 구조라고 생각하고 생략했습니다.
 
-**서버포트에 맞게 curl 명령어에 기입된 포트번호를 설정해주세요.** 
-
 ```shell
 # e.g.
 {
@@ -205,6 +203,9 @@ API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라
   }
 }
 ```
+
+
+**서버포트에 맞게 curl 명령어에 기입된 포트번호를 설정해주세요.** 
 
 ### API Spec
 - `http://localhost:{port}/swagger-ui/index.html`
