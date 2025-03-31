@@ -64,6 +64,7 @@ class ProductService(
         productRepository.delete(product)
     }
 
+    @Transactional
     private fun Product.toResponse(): ProductResponse {
         return ProductResponse(
             id = id,

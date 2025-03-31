@@ -178,10 +178,10 @@ docker ps | grep shop-app
 
 
 ### 테이블 관계
-- **`Product`**는 **`Brand`**와 **`Category`**와 **N:1** 관계입니다.
+- `Product`는 `Brand`와 `Category`와 **N:1** 관계입니다.
   - 하나의 상품은 하나의 브랜드와 하나의 카테고리에 속합니다.
   - 하나의 브랜드는 여러 상품을 가질 수 있으며, 하나의 카테고리도 여러 상품을 가질 수 있습니다.
-- **`Brand`**와 **`Category`**는 **1:N** 관계입니다.
+- `Brand`와 `Category`는 **1:N** 관계입니다.
   - 하나의 브랜드는 여러 상품을 가질 수 있고, 하나의 카테고리도 여러 상품을 가질 수 있습니다.
 
 
@@ -190,7 +190,8 @@ docker ps | grep shop-app
 각 구간에 캐싱관련 로직은 제외 했습니다. 1,2,3번 API의 경우 캐싱하여 일정시간동안 제공해주면 좀 더 효율적일 것으로 보입니다.
 각 Service, Controller 함수의 유닛테스트를 작성하고, Controller 함수의 통합 테스트 작성을 했습니다.
 
-API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라이언트에서 파싱등의 과정을 단순하게 만들 수 있지만 요청, 응답에 대한 결과만 확인하면 되는 구조라 생략했습니다.
+API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라이언트에서 파싱등의 과정을 단순하게 만들 수 있지만 
+우선은 요청, 응답에 대한 결과만 확인하면 되는 구조라고 생각하고 생략했습니다.
 
 ```shell
 # e.g.
@@ -223,6 +224,7 @@ API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라
   - [ProductQueryRepositoryImpl.kt](src/main/kotlin/com/shoptest/domain/product/repository/ProductQueryRepositoryImpl.kt)
   - [ProductRepository.kt](src/main/kotlin/com/shoptest/domain/product/repository/ProductRepository.kt)
 
+---
 
 #### - 2.단일 브랜드로 모든 카테고리 상품을 구매할 때 최저가격에 판매하는 브랜드와 카테고리의 상품가격, 총액을 조회하는 API
 - 관련 DTO
@@ -237,6 +239,8 @@ API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라
   - [ProductQueryRepositoryImpl.kt](src/main/kotlin/com/shoptest/domain/product/repository/ProductQueryRepositoryImpl.kt)
   - [ProductRepository.kt](src/main/kotlin/com/shoptest/domain/product/repository/ProductRepository.kt)
 
+---
+
 #### - 3.카테고리 이름으로 최저, 최고 가격 브랜드와 상품 가격을 조회하는 API
 - 관련 DTO
   - [MaxMinPriceByCategoryResponse.kt](src/main/kotlin/com/shoptest/api/price/dto/MaxMinPriceByCategoryResponse.kt)
@@ -250,6 +254,8 @@ API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라
   - [ProductQueryRepositoryImpl.kt](src/main/kotlin/com/shoptest/domain/product/repository/ProductQueryRepositoryImpl.kt)
   - [ProductRepository.kt](src/main/kotlin/com/shoptest/domain/product/repository/ProductRepository.kt)
 
+---
+
 #### - 4. 브랜드 및 상품을 추가 / 업데이트 / 삭제하는 API
 - 브랜드 관련 DTO
   - [BrandCreateRequest.kt](src/main/kotlin/com/shoptest/api/brand/dto/BrandCreateRequest.kt)
@@ -258,7 +264,6 @@ API Response Wrapper를 통해 응답 구조의 일관성을 만들어서 클라
 - 로직설명
   - 브랜드 관련 CUD 로직 구현
 
----
 
 - 상품 관련 DTO
   - [ProductCreateRequest.kt](src/main/kotlin/com/shoptest/api/product/dto/ProductCreateRequest.kt)
@@ -289,7 +294,7 @@ curl -X GET http://localhost:8080/api/v1/price/cheapest-brand
 
 #### 3. 카테고리 이름으로 최저, 최고 가격 브랜드와 상품 가격을 조회하는 API
 ```shell
-curl -G "http://localhost:8080/api/v1/price/max-min" \
+curl -G http://localhost:8080/api/v1/price/max-min \
      --data-urlencode "category=상의"
 ```
 
