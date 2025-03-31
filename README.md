@@ -29,7 +29,7 @@
 ```shell
 # 1. Git clone
 git clone https://github.com/class-yoo/shop.git
-cd shop-test
+cd shop
 
 # 2. Docker build (프로젝트 루트 디렉토리)
 docker build -t shop-app .
@@ -85,7 +85,7 @@ OpenJDK 64-Bit Server VM Temurin-21+35 (build 21+35-LTS, mixed mode, sharing)
 ### Git Clone - 필수
 ```shell
 git clone https://github.com/class-yoo/shop.git
-cd shop-test
+cd shop
 ```
 
 # 2. 빌드 및 실행

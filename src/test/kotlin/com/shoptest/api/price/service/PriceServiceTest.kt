@@ -68,8 +68,6 @@ class PriceServiceTest {
             )
         }
 
-        val categoryMap = categoryList.associateBy { it.id }
-
         whenever(categoryRepository.findAll()).thenReturn(categoryList)
         whenever(categoryRepository.count()).thenReturn(categoryList.size.toLong())
 
